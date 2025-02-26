@@ -1,27 +1,29 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
-	"os"
+	"math"
 	"strconv"
 	"strings"
 
 	"github.com/xuri/excelize/v2"
 )
 
-// Student struct to hold extracted data
+
+
 type Student struct {
-	Emplid string  `json:"emplid"`
-	Quiz   float64 `json:"quiz"`
-	MidSem float64 `json:"mid_sem"`
-	LabTest float64 `json:"lab_test"`
-	WeeklyLabs float64 `json:"weekly_labs"`
-	PreCompre float64 `json:"pre_compre"`
-	Compre float64 `json:"compre"`
-	Total  float64 `json:"total"`
+	Emplid        string  
+	Quiz          float64 
+	MidSem        float64 
+	LabTest       float64 
+	WeeklyLabs    float64 
+	PreCompre     float64 
+	Compre        float64 
+	Total         float64 
+	ComputedTotal float64 
+	Discrepancy   bool    
 }
 
 var requiredColumns = []string{
@@ -58,9 +60,14 @@ func getColumnIndices(headers []string) map[string]int {
 	return columnIndices
 }
 
+func computeTotal(student Student) float64 {
+	
+	computedPreCompre := student.Quiz + student.MidSem + student.LabTest + student.WeeklyLabs
+	return computedPreCompre + student.Compre
+}
+
 func main() {
 	filePath := flag.String("file", "", "Path to the Excel file")
-	outputJSON := flag.String("export", "", "Export data to a JSON file")
 	flag.Parse()
 
 	if *filePath == "" {
@@ -86,37 +93,37 @@ func main() {
 	columnIndices := getColumnIndices(rows[0])
 	var students []Student
 
-	for _, row := range rows[1:] {
+	const tolerance = 0.01 
+
+	for i, row := range rows[1:] {
 		if isEmptyRow(row) {
 			continue
 		}
 
 		student := Student{
-			Emplid:     row[columnIndices["Emplid"]],
-			Quiz:      parseFloat(row[columnIndices["Quiz (30)"]]),
-			MidSem:    parseFloat(row[columnIndices["Mid-Sem (75)"]]),
-			LabTest:   parseFloat(row[columnIndices["Lab Test (60)"]]),
+			Emplid:      row[columnIndices["Emplid"]],
+			Quiz:       parseFloat(row[columnIndices["Quiz (30)"]]),
+			MidSem:     parseFloat(row[columnIndices["Mid-Sem (75)"]]),
+			LabTest:    parseFloat(row[columnIndices["Lab Test (60)"]]),
 			WeeklyLabs: parseFloat(row[columnIndices["Weekly Labs (30)"]]),
-			PreCompre: parseFloat(row[columnIndices["Pre-Compre (195)"]]),
-			Compre:    parseFloat(row[columnIndices["Compre (105)"]]),
-			Total:     parseFloat(row[columnIndices["Total (300)"]]),
+			Compre:     parseFloat(row[columnIndices["Compre (105)"]]),
+			Total:      parseFloat(row[columnIndices["Total (300)"]]),
 		}
+		student.PreCompre = student.Quiz + student.MidSem + student.LabTest + student.WeeklyLabs
+		student.ComputedTotal = computeTotal(student)
+		student.Discrepancy = math.Abs(student.ComputedTotal-student.Total) > tolerance
+
+		if student.Discrepancy {
+			fmt.Printf("Discrepancy in Row %d: Computed Total = %.2f, Expected Total = %.2f\n", i+2, student.ComputedTotal, student.Total)
+		}
+
 		students = append(students, student)
 	}
 
-	if *outputJSON != "" {
-		data, err := json.MarshalIndent(students, "", "  ")
-		if err != nil {
-			log.Fatalln("Error generating JSON:", err)
-		}
-		if err := os.WriteFile(*outputJSON, data, 0644); err != nil {
-			log.Fatalln("Error writing JSON file:", err)
-		}
-		fmt.Println("Data exported to", *outputJSON)
-	} else {
-		for _, student := range students {
-			fmt.Printf("%s: Total Marks: %.2f\n", student.Emplid, student.Total)
-		}
+	for _, student := range students {
+		fmt.Printf("%s: Computed Total: %.2f, Expected Total: %.2f, Discrepancy: %t\n", student.Emplid, student.ComputedTotal, student.Total, student.Discrepancy)
 	}
 }
+
+
 
