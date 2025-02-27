@@ -1,0 +1,165 @@
+{
+  "generalAverages": {
+    "Total": 139.9985294117647
+  },
+  "branchAverages": {
+    "A1": 101.75,
+    "A2": 15.565000000000001,
+    "A3": 145.4822857142857,
+    "A4": 126.37925531914891,
+    "A5": 67.49121212121213,
+    "A7": 165.01560509554142,
+    "A8": 132.01575,
+    "AA": 144.9095,
+    "AD": 144.33870967741936,
+    "B1": 111.5,
+    "B2": 36.75,
+    "B4": 149.5,
+    "B5": 99.375
+  },
+  "topStudents": {
+    "Compre": [
+      {
+        "rank": 1,
+        "emplid": "11120240610",
+        "campusId": "2024A7PS0610P",
+        "marks": 267.5
+      },
+      {
+        "rank": 2,
+        "emplid": "11120210006",
+        "campusId": "2021A7PS0006P",
+        "marks": 267
+      },
+      {
+        "rank": 3,
+        "emplid": "11120240522",
+        "campusId": "2024A7PS0522P",
+        "marks": 257.5
+      }
+    ],
+    "LabTest": [
+      {
+        "rank": 1,
+        "emplid": "11120240610",
+        "campusId": "2024A7PS0610P",
+        "marks": 267.5
+      },
+      {
+        "rank": 2,
+        "emplid": "11120210006",
+        "campusId": "2021A7PS0006P",
+        "marks": 267
+      },
+      {
+        "rank": 3,
+        "emplid": "11120240522",
+        "campusId": "2024A7PS0522P",
+        "marks": 257.5
+      }
+    ],
+    "MidSem": [
+      {
+        "rank": 1,
+        "emplid": "11120240610",
+        "campusId": "2024A7PS0610P",
+        "marks": 267.5
+      },
+      {
+        "rank": 2,
+        "emplid": "11120210006",
+        "campusId": "2021A7PS0006P",
+        "marks": 267
+      },
+      {
+        "rank": 3,
+        "emplid": "11120240522",
+        "campusId": "2024A7PS0522P",
+        "marks": 257.5
+      }
+    ],
+    "Quiz": [
+      {
+        "rank": 1,
+        "emplid": "11120240610",
+        "campusId": "2024A7PS0610P",
+        "marks": 267.5
+      },
+      {
+        "rank": 2,
+        "emplid": "11120210006",
+        "campusId": "2021A7PS0006P",
+        "marks": 267
+      },
+      {
+        "rank": 3,
+        "emplid": "11120240522",
+        "campusId": "2024A7PS0522P",
+        "marks": 257.5
+      }
+    ],
+    "Total": [
+      {
+        "rank": 1,
+        "emplid": "11120240610",
+        "campusId": "2024A7PS0610P",
+        "marks": 267.5
+      },
+      {
+        "rank": 2,
+        "emplid": "11120210006",
+        "campusId": "2021A7PS0006P",
+        "marks": 267
+      },
+      {
+        "rank": 3,
+        "emplid": "11120240522",
+        "campusId": "2024A7PS0522P",
+        "marks": 257.5
+      }
+    ],
+    "WeeklyLabs": [
+      {
+        "rank": 1,
+        "emplid": "11120240610",
+        "campusId": "2024A7PS0610P",
+        "marks": 267.5
+      },
+      {
+        "rank": 2,
+        "emplid": "11120210006",
+        "campusId": "2021A7PS0006P",
+        "marks": 267
+      },
+      {
+        "rank": 3,
+        "emplid": "11120240522",
+        "campusId": "2024A7PS0522P",
+        "marks": 257.5
+      }
+    ]
+  },
+  "discrepancies": [
+    {
+      "row": 8,
+      "emplid": "11120210741",
+      "campusId": "2021A8PS0741P",
+      "computedTotal": 121.5,
+      "expectedTotal": 169.5
+    },
+    {
+      "row": 47,
+      "emplid": "11120240366",
+      "campusId": "2024A3PS0366P",
+      "computedTotal": 184,
+      "expectedTotal": 182
+    },
+    {
+      "row": 136,
+      "emplid": "11120240453",
+      "campusId": "2024A4PS0453P",
+      "computedTotal": 141,
+      "expectedTotal": 140
+    }
+  ]
+}

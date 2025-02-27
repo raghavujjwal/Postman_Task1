@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"math"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -14,18 +16,43 @@ import (
 
 // Student struct to hold extracted data
 type Student struct {
-	CampusID      string  
-	Branch        string  
-	Quiz          float64 
-	MidSem        float64 
-	LabTest       float64 
-	WeeklyLabs    float64 
-	PreCompre     float64 
-	Compre        float64 
-	Total         float64 
-	ComputedTotal float64 
-	Discrepancy   bool    
-	Emplid        string  
+	CampusID      string
+	Branch        string
+	Quiz          float64
+	MidSem        float64
+	LabTest       float64
+	WeeklyLabs    float64
+	PreCompre     float64
+	Compre        float64
+	Total         float64
+	ComputedTotal float64
+	Discrepancy   bool
+	Emplid        string
+}
+
+// ReportData holds all the summary data for JSON export
+type ReportData struct {
+	GeneralAverages   map[string]float64            `json:"generalAverages"`
+	BranchAverages    map[string]float64            `json:"branchAverages"`
+	TopStudents       map[string][]TopStudentInfo   `json:"topStudents"`
+	Discrepancies     []DiscrepancyInfo             `json:"discrepancies"`
+}
+
+// TopStudentInfo holds data about top-performing students
+type TopStudentInfo struct {
+	Rank       int     `json:"rank"`
+	Emplid     string  `json:"emplid"`
+	CampusID   string  `json:"campusId"`
+	Marks      float64 `json:"marks"`
+}
+
+// DiscrepancyInfo holds information about discrepancies
+type DiscrepancyInfo struct {
+	Row           int     `json:"row"`
+	Emplid        string  `json:"emplid"`
+	CampusID      string  `json:"campusId"`
+	ComputedTotal float64 `json:"computedTotal"`
+	ExpectedTotal float64 `json:"expectedTotal"`
 }
 
 var requiredColumns = []string{
@@ -77,6 +104,7 @@ func computeTotal(student Student) float64 {
 func main() {
 	filePath := flag.String("file", "", "Path to the Excel file")
 	classFilter := flag.String("class", "", "Filter by Class No")
+	exportPath := flag.String("export", "", "Export report to JSON file (provide filename)")
 	flag.Parse()
 
 	if *filePath == "" {
@@ -105,8 +133,9 @@ func main() {
 	branchTotals := make(map[string]float64)
 	branchCounts := make(map[string]int)
 	topScores := make(map[string][]Student)
+	var discrepancies []DiscrepancyInfo
 
-	const tolerance = 0.01 
+	const tolerance = 0.01
 
 	for i, row := range rows[1:] {
 		if isEmptyRow(row) {
@@ -130,6 +159,13 @@ func main() {
 
 		if student.Discrepancy {
 			fmt.Printf("Discrepancy in Row %d: Computed Total = %.2f, Expected Total = %.2f\n", i+2, student.ComputedTotal, student.Total)
+			discrepancies = append(discrepancies, DiscrepancyInfo{
+				Row:           i + 2,
+				Emplid:        student.Emplid,
+				CampusID:      student.CampusID,
+				ComputedTotal: student.ComputedTotal,
+				ExpectedTotal: student.Total,
+			})
 		}
 
 		if *classFilter == "" || *classFilter == student.CampusID {
@@ -144,10 +180,19 @@ func main() {
 		}
 	}
 
+	// Prepare data for report
+	reportData := ReportData{
+		GeneralAverages: make(map[string]float64),
+		BranchAverages:  make(map[string]float64),
+		TopStudents:     make(map[string][]TopStudentInfo),
+		Discrepancies:   discrepancies,
+	}
+
 	fmt.Println("\n### General Averages ###")
 	for _, component := range []string{"Total"} {
 		average := totalScores[component] / float64(len(students))
 		fmt.Printf("%s Average: %.2f\n", component, average)
+		reportData.GeneralAverages[component] = average
 	}
 
 	fmt.Println("\n### Branch-wise Averages (2024 Batch) ###")
@@ -155,6 +200,7 @@ func main() {
 		if branchCounts[branch] > 0 {
 			average := total / float64(branchCounts[branch])
 			fmt.Printf("%s Average Total: %.2f\n", branch, average)
+			reportData.BranchAverages[branch] = average
 		}
 	}
 
@@ -163,18 +209,35 @@ func main() {
 		sort.Slice(students, func(i, j int) bool {
 			return students[i].Total > students[j].Total
 		})
+		
 		fmt.Printf("\nTop 3 students for %s:\n", component)
+		var topStudentsList []TopStudentInfo
+		
 		for rank, student := range students[:3] {
 			fmt.Printf("Rank %d: Emplid: %s, Marks: %.2f\n", rank+1, student.Emplid, student.Total)
+			topStudentsList = append(topStudentsList, TopStudentInfo{
+				Rank:     rank + 1,
+				Emplid:   student.Emplid,
+				CampusID: student.CampusID,
+				Marks:    student.Total,
+			})
+		}
+		
+		reportData.TopStudents[component] = topStudentsList
+	}
+
+	// Export to JSON if requested
+	if *exportPath != "" {
+		jsonData, err := json.MarshalIndent(reportData, "", "  ")
+		if err != nil {
+			log.Println("Error creating JSON:", err)
+		} else {
+			err = os.WriteFile(*exportPath, jsonData, 0644)
+			if err != nil {
+				log.Println("Error writing JSON file:", err)
+			} else {
+				fmt.Printf("\nReport exported to %s\n", *exportPath)
+			}
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
